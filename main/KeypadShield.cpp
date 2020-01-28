@@ -29,74 +29,74 @@ int KeypadShield::getButton() {
   }
 }
 
+void KeypadShield::writeTopLine(String topLine, boolean force = false) {
 
-void KeypadShield::writeTopLine(String topLine) {
-  
-  if (this->currentTopLine.equals(topLine))
-    return;
+  if (!force) {
+    if (topLine.equals(this->currentTopLine))
+      return;
 
-  if (this->lastTempDisplay > 0 && millis() - this->lastTempDisplay  < this->tempDisplayTime)
-    return;
+    if (this->tmpDisplayTime > 0 && (millis() - this->lastTmpDisplay)  < this->tmpDisplayTime) {
+      Serial.println("wait " + String(this->tmpDisplayTime - (millis() - this->lastTmpDisplay)));
+      return;
+    } else
+      this->tmpDisplayTime = 0;
+  }
+
+  while (topLine.length() < 16)
+    topLine += " ";
+  topLine = topLine.substring(0, 16);
 
   this->lcd.setCursor(0, 0);
   this->lcd.print(topLine);
-
-  this->lastTempDisplay = 0;
   this->currentTopLine = topLine;
+
+  Serial.println("this->currentTopLine " + this->currentTopLine);
+}
+
+void KeypadShield::writeTmpMessage(String msg, int tmpDisplayTime = 3000) {
+  this->lastTmpDisplay = millis();
+  this->tmpDisplayTime = tmpDisplayTime;
+  this->writeTopLine(msg, true);
 }
 
 
-void KeypadShield::writeTmpMessage(String msg) {
-  this->writeTmpMessage(msg, 5000);
-}
-
-void KeypadShield::writeTmpMessage(String msg, int tempDisplayTime) {
-  while (msg.length() < 16)
-    msg += " ";
-
-  this->writeTopLine(msg);
-  this->lastTempDisplay = millis();
-  this->tempDisplayTime = tempDisplayTime;
-}
-
-
-void KeypadShield::displayPvWatt(Victron victron) {
+void KeypadShield::displayPvWatt(Victron victron, boolean force = false) {
   String topLine = "Ppv:";
   String sPvWatt = String(victron.getPvWatt(), 2);
   sPvWatt += " W";
   for (int i = topLine.length() ; i < 16 - sPvWatt.length(); i++)
     topLine += " ";
   topLine += sPvWatt;
-  this->writeTopLine(topLine);
+  this->writeTopLine(topLine, force);
 }
 
-void KeypadShield::displayPvVolt(Victron victron) {
+void KeypadShield::displayPvVolt(Victron victron, boolean force = false) {
   String topLine = "Vpv:";
   String sPvVolt = String(victron.getPvVolt(), 2);
   sPvVolt += " V";
   for (int i = topLine.length() ; i < 16 - sPvVolt.length(); i++)
     topLine += " ";
   topLine += sPvVolt;
-  this->writeTopLine(topLine);
+  this->writeTopLine(topLine, force);
 }
 
-void KeypadShield::displayBVolt(Victron victron) {
+void KeypadShield::displayBVolt(Victron victron, boolean force = false) {
   String topLine = "Vb:";
   String sBVolt = String(victron.getBVolt(), 2);
   sBVolt += " V";
   for (int i = topLine.length() ; i < 16 - sBVolt.length(); i++)
     topLine += " ";
   topLine += sBVolt;
-  this->writeTopLine(topLine);
+  this->writeTopLine(topLine, force);
 }
 
-void KeypadShield::displayErrCode(Victron victron) {
+void KeypadShield::displayErrCode(Victron victron, boolean force = false) {
   String topLine = "Err:";
   String sErrCode = String(victron.getErrCode());
   for (int i = topLine.length() ; i < 16 - sErrCode.length(); i++)
     topLine += " ";
   topLine += sErrCode;
-  this->writeTopLine(topLine);
+  this->writeTopLine(topLine, force);
 }
 
 void KeypadShield::displayChargeState(Victron victron) {
@@ -156,7 +156,8 @@ void KeypadShield::setup() {
 
 void KeypadShield::loop(Victron victron) {
 
-  switch (this->getButton()) {
+  int button = this->getButton();
+  switch (button) {
     case RIGHT:
     case UP:
       this->currentView += 1;
@@ -179,16 +180,16 @@ void KeypadShield::loop(Victron victron) {
 
   switch (this->currentView) {
     case PPV:
-      this->displayPvWatt(victron);
+      this->displayPvWatt(victron, button != NONE);
       break;
     case VPV:
-      this->displayPvVolt(victron);
+      this->displayPvVolt(victron, button != NONE);
       break;
     case VB:
-      this->displayBVolt(victron);
+      this->displayBVolt(victron, button != NONE);
       break;
     case ERR:
-      this->displayErrCode(victron);
+      this->displayErrCode(victron, button != NONE);
       break;
   }
 

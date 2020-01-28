@@ -13,8 +13,9 @@ class KeypadShield {
     LiquidCrystal lcd =  LiquidCrystal (8, 9, 4, 5, 6, 7);
 
     unsigned long lastBtnClick;
-    unsigned long lastTempDisplay = 0;
-    int tempDisplayTime = 5000;
+
+    unsigned long lastTmpDisplay = 0;
+    unsigned int tmpDisplayTime = 0;
 
     enum buttons { RIGHT, UP, DOWN, LEFT, SELECT, NONE };
     enum views { PPV, VPV, VB, ERR};
@@ -27,21 +28,20 @@ class KeypadShield {
     void setBacklightPercent(byte percent);
     int getButton();
 
-    void displayPvWatt(Victron victron);
-    void displayPvVolt(Victron victron);
-    void displayBVolt(Victron victron) ;
-    void displayErrCode(Victron victron);
+    void displayPvWatt(Victron victron, boolean force = false) ;
+    void displayPvVolt(Victron victron, boolean force = false) ;
+    void displayBVolt(Victron victron, boolean force = false) ;
+    void displayErrCode(Victron victron, boolean force = false) ;
     void displayChargeState(Victron victron) ;
 
-    void writeTopLine(String topLine) ;
+    void writeTopLine(String topLine, boolean force = false) ;
 
   public:
     void turnDisplayOn();
     void turnDisplayOff();
     void setup();
     void loop(Victron victron) ;
-    void writeTmpMessage(String msg);
-    void writeTmpMessage(String msg, int tempDisplayTime);
+    void writeTmpMessage(String msg, int tempDisplayTime = 3000);
 };
 
 #endif
