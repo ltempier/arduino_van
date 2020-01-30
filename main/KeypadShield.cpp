@@ -52,50 +52,56 @@ void KeypadShield::writeTopLine(String topLine, boolean force = false) {
 }
 
 void KeypadShield::writeTmpMessage(String msg, int tmpDisplayDuration = 3000) {
-  this->turnDisplayOn();
   this->lastTimeTmpDisplay = millis();
   this->tmpDisplayDuration = tmpDisplayDuration;
   this->writeTopLine(msg, true);
+  this->turnDisplayOn();
 }
 
 
 void KeypadShield::displayPvWatt(Victron victron, boolean force = false) {
-  String topLine = "Ppv:";
+  String topLine = "Ppv: ";
   String sPvWatt = String(victron.getPvWatt(), 2);
   sPvWatt += " W";
-  for (int i = topLine.length() ; i < 16 - sPvWatt.length(); i++)
+
+  byte appendSpaces =  16 - (topLine.length() + sPvWatt.length());
+  for (byte i = 0 ; i < appendSpaces; i++)
     topLine += " ";
-  topLine += sPvWatt;
-  this->writeTopLine(topLine, force);
+
+  this->writeTopLine(topLine + sPvWatt, force);
 }
 
 void KeypadShield::displayPvVolt(Victron victron, boolean force = false) {
-  String topLine = "Vpv:";
+  String topLine = "Vpv: ";
   String sPvVolt = String(victron.getPvVolt(), 2);
   sPvVolt += " V";
-  for (int i = topLine.length() ; i < 16 - sPvVolt.length(); i++)
+
+  byte appendSpaces =  16 - (topLine.length() + sPvVolt.length());
+  for (byte i = 0 ; i < appendSpaces; i++)
     topLine += " ";
-  topLine += sPvVolt;
-  this->writeTopLine(topLine, force);
+  this->writeTopLine(topLine + sPvVolt, force);
 }
 
 void KeypadShield::displayBVolt(Victron victron, boolean force = false) {
-  String topLine = "Vb:";
+  String topLine = "Vb: ";
   String sBVolt = String(victron.getBVolt(), 2);
   sBVolt += " V";
-  for (int i = topLine.length() ; i < 16 - sBVolt.length(); i++)
+
+  byte appendSpaces =  16 - (topLine.length() + sBVolt.length());
+  for (byte i = 0 ; i < appendSpaces; i++)
     topLine += " ";
-  topLine += sBVolt;
-  this->writeTopLine(topLine, force);
+  this->writeTopLine(topLine + sBVolt, force);
 }
 
 void KeypadShield::displayErrCode(Victron victron, boolean force = false) {
-  String topLine = "Err:";
+  String topLine = "Err: ";
   String sErrCode = String(victron.getErrCode());
-  for (int i = topLine.length() ; i < 16 - sErrCode.length(); i++)
+
+  byte appendSpaces =  16 - (topLine.length() + sErrCode.length());
+  for (byte i = 0 ; i < appendSpaces; i++)
     topLine += " ";
-  topLine += sErrCode;
-  this->writeTopLine(topLine, force);
+
+  this->writeTopLine(topLine + sErrCode, force);
 }
 
 void KeypadShield::displayChargeState(Victron victron) {
