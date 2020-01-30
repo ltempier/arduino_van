@@ -11,18 +11,13 @@ void setup() {
   victron.setup(); //Serial 19200
   keypadShield.setup();
   remotes.setup();
+  keypadShield.writeTmpMessage("setup done", 1000);
 }
 
 
 void loop() {
   victron.loop();
   keypadShield.loop(victron);
-  //remotes.loop(keypadShield);
-
-  unsigned long id = remotes.checkClick();
-  if (id > 0) {
-    Serial.println(id);
-    keypadShield.writeTmpMessage(String(id));
-  }
-
+  remotes.loop(keypadShield);
+  delay(10);
 }

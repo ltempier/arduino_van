@@ -3,6 +3,7 @@
 
 void KeypadShield::turnDisplayOn() {
   digitalWrite(pin_LCD_BL, HIGH);
+  this->lastTimeTurnDisplayOn = millis();
   this->backlightState = true;
 }
 
@@ -14,11 +15,11 @@ void KeypadShield::turnDisplayOff() {
 int KeypadShield::getButton() {
   static const int values[] = { 50, 150, 300, 500, 750 };
   int value = analogRead(pin_button);
-  if (value > values[4] || millis() - lastBtnClick < 300)
+  if (value > values[4] || millis() - this->lastTimeBtnClick < 300)
     return NONE;
 
-  lastBtnClick = millis();
-  if (!backlightState) {
+  this->lastTimeBtnClick = millis();
+  if (!this->backlightState) {
     this->turnDisplayOn();
     return NONE;
   }
@@ -35,11 +36,10 @@ void KeypadShield::writeTopLine(String topLine, boolean force = false) {
     if (topLine.equals(this->currentTopLine))
       return;
 
-    if (this->tmpDisplayTime > 0 && (millis() - this->lastTmpDisplay)  < this->tmpDisplayTime) {
-      Serial.println("wait " + String(this->tmpDisplayTime - (millis() - this->lastTmpDisplay)));
+    if (this->tmpDisplayDuration > 0 && (millis() - this->lastTimeTmpDisplay)  < this->tmpDisplayDuration) {
       return;
     } else
-      this->tmpDisplayTime = 0;
+      this->tmpDisplayDuration = 0;
   }
 
   while (topLine.length() < 16)
@@ -49,13 +49,12 @@ void KeypadShield::writeTopLine(String topLine, boolean force = false) {
   this->lcd.setCursor(0, 0);
   this->lcd.print(topLine);
   this->currentTopLine = topLine;
-
-  Serial.println("this->currentTopLine " + this->currentTopLine);
 }
 
-void KeypadShield::writeTmpMessage(String msg, int tmpDisplayTime = 3000) {
-  this->lastTmpDisplay = millis();
-  this->tmpDisplayTime = tmpDisplayTime;
+void KeypadShield::writeTmpMessage(String msg, int tmpDisplayDuration = 3000) {
+  this->turnDisplayOn();
+  this->lastTimeTmpDisplay = millis();
+  this->tmpDisplayDuration = tmpDisplayDuration;
   this->writeTopLine(msg, true);
 }
 
@@ -154,7 +153,7 @@ void KeypadShield::setup() {
   this->lcd.createChar(6, END_DIV_1_OF_1);
 }
 
-void KeypadShield::loop(Victron victron) {
+void KeypadShield::loop(Victron &victron) {
 
   int button = this->getButton();
   switch (button) {
@@ -195,6 +194,6 @@ void KeypadShield::loop(Victron victron) {
 
   this->displayChargeState(victron);
 
-  if (millis() - lastBtnClick > 5 * 60 * 1000)
+  if (millis() - this->lastTimeTurnDisplayOn >  60000)
     this->turnDisplayOff();
 }
