@@ -1,22 +1,23 @@
 
 #include "Remotes.h"
 
-Remotes::Remotes() {
-
-}
 
 void Remotes::setup() {
   pinMode(pin_interrupt, INPUT_PULLUP);
   mySwitch = RCSwitch();
   mySwitch.enableReceive(digitalPinToInterrupt(pin_interrupt));
+
+  this->pwm = Adafruit_PWMServoDriver();
+  this->pwm.begin();
+  this->pwm.setOscillatorFrequency(27000000);
+  this->pwm.setPWMFreq(1000);
 }
 
 boolean Remotes::arrayContain(unsigned long testArray[], unsigned long value) {
-  for (byte i; i < sizeof(testArray); i++) {
-    if ( value == testArray[i] ) {
+  byte arrayLength = sizeof(testArray);
+  for (byte i; i < arrayLength; i++)
+    if ( value == testArray[i] )
       return true;
-    }
-  }
   return false;
 }
 
@@ -27,14 +28,13 @@ unsigned long Remotes::getButton() {
 
     if (id == this->lastBtnClick && millis() - this->lastTimeBtnClick < 200)
       return 0;
-      
+
     this->lastTimeBtnClick = millis();
     this->lastBtnClick = id;
     return id;
   }
   return 0;
 }
-
 
 void Remotes::setLight1(int value) {
   if (value < 0)
@@ -45,8 +45,8 @@ void Remotes::setLight1(int value) {
   if (this->levelLight1 == value)
     return;
 
-  //int pwmValue = map(value, 0,lightLevels,0,4096);
-  //pwm.setPWM(pin, pwmValue, 4096-pwmValue);
+  int pwmValue = map(value, 0, lightLevels, 0, 4096);
+  this->pwm.setPWM(0, pwmValue, 4096 - pwmValue);
 
   this->levelLight1 = value;
 }
@@ -131,34 +131,34 @@ void Remotes::loop(KeypadShield &keypadShield) {
       this->setLight3(0);
     }
 
-    else if (this->arrayContain(LIGHT_1_D, id) == true) {
+    else if (this->arrayContain(LIGHT_1_DEC, id) == true) {
       this->setLight1(this->levelLight1 - 1);
       keypadShield.writeTmpMessage("LIGHT 1    (" + String(this->levelLight1) + "/" + String(this->lightLevels) + ")");
     }
-    else if (this->arrayContain(LIGHT_1_I, id) == true) {
+    else if (this->arrayContain(LIGHT_1_INC, id) == true) {
       this->setLight1(this->levelLight1 + 1);
       keypadShield.writeTmpMessage("LIGHT 1    (" + String(this->levelLight1) + "/" + String(this->lightLevels) + ")");
     }
 
-    else if (this->arrayContain(LIGHT_2_D, id) == true) {
+    else if (this->arrayContain(LIGHT_2_DEC, id) == true) {
       this->setLight2(this->levelLight2 - 1);
       keypadShield.writeTmpMessage("LIGHT 2    (" + String(this->levelLight2) + "/" + String(this->lightLevels) + ")");
     }
-    else if (this->arrayContain(LIGHT_2_I, id) == true) {
+    else if (this->arrayContain(LIGHT_2_INC, id) == true) {
       this->setLight2(this->levelLight2 + 1);
       keypadShield.writeTmpMessage("LIGHT 2    (" + String(this->levelLight2) + "/" + String(this->lightLevels) + ")");
     }
 
-    else if (this->arrayContain(LIGHT_3_D, id) == true) {
+    else if (this->arrayContain(LIGHT_3_DEC, id) == true) {
       this->setLight3(this->levelLight3 - 1);
       keypadShield.writeTmpMessage("LIGHT 3    (" + String(this->levelLight3) + "/" + String(this->lightLevels) + ")");
     }
-    else if (this->arrayContain(LIGHT_3_I, id) == true) {
+    else if (this->arrayContain(LIGHT_3_INC, id) == true) {
       this->setLight3(this->levelLight3 + 1);
       keypadShield.writeTmpMessage("LIGHT 3    (" + String(this->levelLight3) + "/" + String(this->lightLevels) + ")");
     }
     else {
-      keypadShield.writeTmpMessage("NO BTN ASSIGN");
+      keypadShield.writeTmpMessage("BTN NOT ASSIGNED");
     }
   }
 }

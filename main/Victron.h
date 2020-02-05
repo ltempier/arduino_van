@@ -29,7 +29,9 @@ class Victron {
     int chargeState = 0;
     int errCode = 0;
 
+    const int comDelayMicros = 800;
     void fetch();
+
   public:
     void setup();
     void loop();

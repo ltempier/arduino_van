@@ -19,11 +19,13 @@ int KeypadShield::getButton() {
     return NONE;
 
   this->lastTimeBtnClick = millis();
+
   if (!this->backlightState) {
     this->turnDisplayOn();
     return NONE;
   }
-
+  
+  this->turnDisplayOn();
   for (int i = 0; i < 5; i++) {
     if (value < values[i])
       return i;

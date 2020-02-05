@@ -15,12 +15,12 @@ const unsigned long LIGHT_3_OFF[] = {3037952512};
      const unsigned long A_4_OFF[] = {2366863872};
 */
 
-const unsigned long LIGHT_1_I[] = {2517858816};
-const unsigned long LIGHT_1_D[] = {2652076544};
-const unsigned long LIGHT_2_I[] = {2786294272};
-const unsigned long LIGHT_2_D[] = {2920512000};
-const unsigned long LIGHT_3_I[] = {3054729728};
-const unsigned long LIGHT_3_D[] = {3188947456};
+const unsigned long LIGHT_1_DEC[] = {2517858816};
+const unsigned long LIGHT_1_INC[] = {2652076544};
+const unsigned long LIGHT_2_DEC[] = {2786294272};
+const unsigned long LIGHT_2_INC[] = {2920512000};
+const unsigned long LIGHT_3_DEC[] = {3054729728};
+const unsigned long LIGHT_3_INC[] = {3188947456};
 /*
      const unsigned long B_4_ON[] = {2383641088};
      const unsigned long B_4_OFF[] = {2165537280};
