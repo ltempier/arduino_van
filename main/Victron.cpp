@@ -54,7 +54,7 @@ void Victron::fetch() {
         else if (c >= '0' && c <= '9') {
           if (comma >= 0)
             comma += 1;
-          bufferValue = (bufferValue * 10) + (float)(c - 48);
+          bufferValue = (bufferValue * 10) + (int)(c - 48);
         }
       }
     }
@@ -74,6 +74,12 @@ void Victron::setup() {
 float Victron::getPvWatt() {
   return this->pvWatt;
 }
+
+void Victron::fillHistPvWatt(float bufferHistPvWatt[]) {
+  for (int i = 0; i < 40; i++)
+    bufferHistPvWatt[i] = this->histPvWatt[i];
+}
+
 float Victron::getBVolt() {
   return this->bVolt;
 }

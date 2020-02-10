@@ -19,5 +19,4 @@ void loop() {
   victron.loop();
   keypadShield.loop(victron);
   remotes.loop(keypadShield);
-  delay(10);
 }

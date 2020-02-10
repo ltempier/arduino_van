@@ -14,8 +14,7 @@ void Remotes::setup() {
 }
 
 boolean Remotes::arrayContain(unsigned long testArray[], unsigned long value) {
-  byte arrayLength = sizeof(testArray);
-  for (byte i; i < arrayLength; i++)
+  for (int i; i < 2; i++)
     if ( value == testArray[i] )
       return true;
   return false;
@@ -31,6 +30,8 @@ unsigned long Remotes::getButton() {
 
     this->lastTimeBtnClick = millis();
     this->lastBtnClick = id;
+
+
     return id;
   }
   return 0;
@@ -75,21 +76,27 @@ void Remotes::setLight3(int value) {
 
 void Remotes::loop(KeypadShield &keypadShield) {
   unsigned long id = this->getButton();
+
   if (id > 0) {
-    if (this->arrayContain(ALL_LIGHTS_ON, id) == true) {
+
+    Serial.print("click remote: ");
+    Serial.println(id);
+
+
+    if (this->arrayContain(ALL_ON, id) == true) {
       this->setLight1(this->lightLevels);
       this->setLight2(this->lightLevels);
       this->setLight3(this->lightLevels);
       keypadShield.writeTmpMessage("ALL LIGHTS ON");
     }
-    else if (this->arrayContain(ALL_LIGHTS_OFF, id) == true) {
+    else if (this->arrayContain(ALL_OFF, id) == true) {
       this->setLight1(0);
       this->setLight2(0);
       this->setLight3(0);
       keypadShield.writeTmpMessage("ALL LIGHTS OFF");
     }
 
-    else if (this->arrayContain(LIGHT_1_ON, id) == true) {
+    else if (this->arrayContain(A_1_ON, id) == true) {
       if (this->levelLight1 > 0) {
         this->setLight1(this->levelLight1 + 1);
       }
@@ -99,11 +106,11 @@ void Remotes::loop(KeypadShield &keypadShield) {
       keypadShield.writeTmpMessage("LIGHT 1 ON (" + String(this->levelLight1) + "/" + String(this->lightLevels) + ")");
 
     }
-    else if (this->arrayContain(LIGHT_1_OFF, id) == true) {
+    else if (this->arrayContain(A_1_OFF, id) == true) {
       keypadShield.writeTmpMessage("LIGHT 1 OFF");
       this->setLight1(0);
     }
-    else if (this->arrayContain(LIGHT_2_ON, id) == true ) {
+    else if (this->arrayContain(A_2_ON, id) == true ) {
       if (this->levelLight2 > 0) {
         this->setLight2(this->levelLight2 + 1);
       }
@@ -113,11 +120,11 @@ void Remotes::loop(KeypadShield &keypadShield) {
       keypadShield.writeTmpMessage("LIGHT 2 ON (" + String(this->levelLight2) + "/" + String(this->lightLevels) + ")");
 
     }
-    else if (this->arrayContain(LIGHT_2_OFF, id) == true) {
+    else if (this->arrayContain(A_2_OFF, id) == true) {
       keypadShield.writeTmpMessage("LIGHT 2 OFF");
       this->setLight2(0);
     }
-    else if (this->arrayContain(LIGHT_3_ON, id) == true) {
+    else if (this->arrayContain(A_3_ON, id) == true) {
       if (this->levelLight3 > 0) {
         this->setLight3(this->levelLight3 + 1);
       }
@@ -126,36 +133,58 @@ void Remotes::loop(KeypadShield &keypadShield) {
       }
       keypadShield.writeTmpMessage("LIGHT 3 ON (" + String(this->levelLight3) + "/" + String(this->lightLevels) + ")");
     }
-    else if (this->arrayContain(LIGHT_3_OFF, id) == true) {
+    else if (this->arrayContain(A_3_OFF, id) == true) {
       keypadShield.writeTmpMessage("LIGHT 3 OFF");
       this->setLight3(0);
     }
 
-    else if (this->arrayContain(LIGHT_1_DEC, id) == true) {
+    else if (this->arrayContain(B_1_ON, id) == true) {
       this->setLight1(this->levelLight1 - 1);
       keypadShield.writeTmpMessage("LIGHT 1    (" + String(this->levelLight1) + "/" + String(this->lightLevels) + ")");
     }
-    else if (this->arrayContain(LIGHT_1_INC, id) == true) {
+    else if (this->arrayContain(B_1_OFF, id) == true) {
       this->setLight1(this->levelLight1 + 1);
       keypadShield.writeTmpMessage("LIGHT 1    (" + String(this->levelLight1) + "/" + String(this->lightLevels) + ")");
     }
 
-    else if (this->arrayContain(LIGHT_2_DEC, id) == true) {
+    else if (this->arrayContain(B_2_ON, id) == true) {
       this->setLight2(this->levelLight2 - 1);
       keypadShield.writeTmpMessage("LIGHT 2    (" + String(this->levelLight2) + "/" + String(this->lightLevels) + ")");
     }
-    else if (this->arrayContain(LIGHT_2_INC, id) == true) {
+    else if (this->arrayContain(B_2_OFF, id) == true) {
       this->setLight2(this->levelLight2 + 1);
       keypadShield.writeTmpMessage("LIGHT 2    (" + String(this->levelLight2) + "/" + String(this->lightLevels) + ")");
     }
 
-    else if (this->arrayContain(LIGHT_3_DEC, id) == true) {
+    else if (this->arrayContain(B_3_ON, id) == true) {
       this->setLight3(this->levelLight3 - 1);
       keypadShield.writeTmpMessage("LIGHT 3    (" + String(this->levelLight3) + "/" + String(this->lightLevels) + ")");
     }
-    else if (this->arrayContain(LIGHT_3_INC, id) == true) {
+    else if (this->arrayContain(B_3_OFF, id) == true) {
       this->setLight3(this->levelLight3 + 1);
       keypadShield.writeTmpMessage("LIGHT 3    (" + String(this->levelLight3) + "/" + String(this->lightLevels) + ")");
+    }
+    else if (this->arrayContain(LIGHT_SWITCH_LEFT, id) == true) {
+      if (this->levelLight1 > 0) {
+        this->setLight1(0);
+        keypadShield.writeTmpMessage("LIGHT 1 OFF");
+      }
+      else {
+        this->setLight1(this->lightLevels);
+        keypadShield.writeTmpMessage("LIGHT 1 ON");
+      }
+      delay(500);
+    }
+    else if (this->arrayContain(LIGHT_SWITCH_RIGHT, id) == true) {
+      if (this->levelLight2 > 0) {
+        this->setLight2(0);
+        keypadShield.writeTmpMessage("LIGHT 2 OFF");
+      }
+      else {
+        this->setLight2(this->lightLevels);
+        keypadShield.writeTmpMessage("LIGHT 2 ON");
+      }
+      delay(500);
     }
     else {
       keypadShield.writeTmpMessage("BTN NOT ASSIGNED");

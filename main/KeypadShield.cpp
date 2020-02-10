@@ -21,11 +21,12 @@ int KeypadShield::getButton() {
   this->lastTimeBtnClick = millis();
 
   if (!this->backlightState) {
-    this->turnDisplayOn();
+    this->turnDisplayOn(); //SET this->backlightState = TRUE
     return NONE;
   }
-  
+
   this->turnDisplayOn();
+
   for (int i = 0; i < 5; i++) {
     if (value < values[i])
       return i;
@@ -33,11 +34,9 @@ int KeypadShield::getButton() {
 }
 
 void KeypadShield::writeTopLine(String topLine, boolean force = false) {
-
   if (!force) {
     if (topLine.equals(this->currentTopLine))
       return;
-
     if (this->tmpDisplayDuration > 0 && (millis() - this->lastTimeTmpDisplay)  < this->tmpDisplayDuration) {
       return;
     } else
@@ -46,7 +45,8 @@ void KeypadShield::writeTopLine(String topLine, boolean force = false) {
 
   while (topLine.length() < 16)
     topLine += " ";
-  topLine = topLine.substring(0, 16);
+  if (topLine.length() > 16)
+    topLine = topLine.substring(0, 16);
 
   this->lcd.setCursor(0, 0);
   this->lcd.print(topLine);
@@ -82,6 +82,7 @@ void KeypadShield::displayPvVolt(Victron victron, boolean force = false) {
   for (byte i = 0 ; i < appendSpaces; i++)
     topLine += " ";
   this->writeTopLine(topLine + sPvVolt, force);
+
 }
 
 void KeypadShield::displayBVolt(Victron victron, boolean force = false) {
@@ -93,16 +94,15 @@ void KeypadShield::displayBVolt(Victron victron, boolean force = false) {
   for (byte i = 0 ; i < appendSpaces; i++)
     topLine += " ";
   this->writeTopLine(topLine + sBVolt, force);
+
 }
 
 void KeypadShield::displayErrCode(Victron victron, boolean force = false) {
   String topLine = "Err: ";
   String sErrCode = String(victron.getErrCode());
-
   byte appendSpaces =  16 - (topLine.length() + sErrCode.length());
   for (byte i = 0 ; i < appendSpaces; i++)
     topLine += " ";
-
   this->writeTopLine(topLine + sErrCode, force);
 }
 
@@ -147,11 +147,11 @@ void KeypadShield::displayChargeState(Victron victron) {
 
 
 void KeypadShield::setup() {
-
   pinMode(pin_LCD_BL, OUTPUT);
   this->turnDisplayOn();
-
   this->lcd.begin(16, 2);
+
+
   this->lcd.createChar(0, START_DIV_0_OF_1);
   this->lcd.createChar(1, START_DIV_1_OF_1);
   this->lcd.createChar(2, DIV_0_OF_2);
@@ -159,6 +159,7 @@ void KeypadShield::setup() {
   this->lcd.createChar(4, DIV_2_OF_2);
   this->lcd.createChar(5, END_DIV_0_OF_1);
   this->lcd.createChar(6, END_DIV_1_OF_1);
+  delay(10);
 }
 
 void KeypadShield::loop(Victron &victron) {
@@ -188,20 +189,26 @@ void KeypadShield::loop(Victron &victron) {
   switch (this->currentView) {
     case PPV:
       this->displayPvWatt(victron, button != NONE);
+      this->displayChargeState(victron);
+
       break;
     case VPV:
       this->displayPvVolt(victron, button != NONE);
+      this->displayChargeState(victron);
+
       break;
     case VB:
       this->displayBVolt(victron, button != NONE);
+      this->displayChargeState(victron);
+
       break;
     case ERR:
       this->displayErrCode(victron, button != NONE);
+      this->displayChargeState(victron);
       break;
   }
 
-  this->displayChargeState(victron);
 
-  if (millis() - this->lastTimeTurnDisplayOn >  60000)
+  if (millis() - this->lastTimeTurnDisplayOn >  60000) // turnDisplayOff after 60 sec
     this->turnDisplayOff();
 }
