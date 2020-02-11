@@ -16,6 +16,8 @@ class Remotes {
     RCSwitch mySwitch;
     Adafruit_PWMServoDriver pwm;
 
+    KeypadShield *keypadShield;
+
     boolean arrayContain(unsigned long testArray[], unsigned long value);
 
     int levelLight1 = 0;
@@ -25,15 +27,15 @@ class Remotes {
     int lightLevels = 5;
     unsigned long lastTimeBtnClick = 0;
     unsigned long lastBtnClick;
-    
+
     unsigned long getButton();
-    void setLight1(int value);
-    void setLight2(int value);
-    void setLight3(int value);
+    void setLight1(int value, boolean showMessage = true);
+    void setLight2(int value, boolean showMessage = true);
+    void setLight3(int value, boolean showMessage = true);
 
   public:
-    void setup();
-    void loop(KeypadShield &keypadShield);
+    void setup(KeypadShield *keypadShield);
+    void loop();
 };
 
 #endif

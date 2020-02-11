@@ -21,8 +21,8 @@ const static unsigned long A_3_OFF[] = {3037952512, 3045058048};
 
 const static unsigned long B_1_ON[] = {2517858816, 2524964352};
 const static unsigned long B_1_OFF[] = {2652076544, 2659182080};
-const static unsigned long B_2_ON[] = {2786294272, 3061835264};
-const static unsigned long B_2_OFF[] = {2920512000, 3196052992};
+const static unsigned long B_2_ON[] = {2786294272, 2793399808};
+const static unsigned long B_2_OFF[] = {2920512000, 2927617536};
 const static unsigned long B_3_ON[] = {3054729728, 3061835264};
 const static unsigned long B_3_OFF[] = {3188947456, 3196052992};
 /*

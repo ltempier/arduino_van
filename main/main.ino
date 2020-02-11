@@ -9,14 +9,13 @@ Remotes remotes;
 
 void setup() {
   victron.setup(); //Serial 19200
-  keypadShield.setup();
-  remotes.setup();
+  keypadShield.setup(&victron);
+  remotes.setup(&keypadShield);
   keypadShield.writeTmpMessage("setup done", 1000);
 }
 
-
 void loop() {
   victron.loop();
-  keypadShield.loop(victron);
-  remotes.loop(keypadShield);
+  keypadShield.loop();
+  remotes.loop();
 }

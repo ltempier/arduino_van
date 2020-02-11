@@ -67,17 +67,8 @@ void Victron::fetch() {
   }
 }
 
-void Victron::setup() {
-  Serial.begin(19200);
-}
-
 float Victron::getPvWatt() {
   return this->pvWatt;
-}
-
-void Victron::fillHistPvWatt(float bufferHistPvWatt[]) {
-  for (int i = 0; i < 40; i++)
-    bufferHistPvWatt[i] = this->histPvWatt[i];
 }
 
 float Victron::getBVolt() {
@@ -91,6 +82,10 @@ int Victron::getChargeStatePercent() {
 }
 int Victron::getErrCode() {
   return this->errCode;
+}
+
+void Victron::setup() {
+  Serial.begin(19200);
 }
 
 void Victron::loop() {
