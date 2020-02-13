@@ -2,6 +2,7 @@
 #define REMOTE_h
 
 #include "Arduino.h"
+#include <EEPROM.h>
 
 #include <RCSwitch.h>
 #include <Adafruit_PWMServoDriver.h>
@@ -20,18 +21,25 @@ class Remotes {
 
     boolean arrayContain(unsigned long testArray[], unsigned long value);
 
-    int levelLight1 = 0;
-    int levelLight2 = 0;
-    int levelLight3 = 0;
+    const byte lightLevels = 3;
 
-    int lightLevels = 5;
+    int levelLight1;
+    int levelLight2;
+    int levelLight3;
+
     unsigned long lastTimeBtnClick = 0;
     unsigned long lastBtnClick;
 
     unsigned long getButton();
-    void setLight1(int value, boolean showMessage = true);
-    void setLight2(int value, boolean showMessage = true);
-    void setLight3(int value, boolean showMessage = true);
+
+    byte getSavedLightLevel(int light);
+    void saveLightLevel(int light, byte value);
+
+
+    void setLight1(int value, boolean showMessage);
+    void setLight2(int value, boolean showMessage);
+    void setLight3(int value, boolean showMessage);
+    void setAllLights(int value, boolean showMessage);
 
   public:
     void setup(KeypadShield *keypadShield);

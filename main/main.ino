@@ -8,7 +8,8 @@ KeypadShield keypadShield;
 Remotes remotes;
 
 void setup() {
-  victron.setup(); //Serial 19200
+  Serial.begin(19200);
+  victron.setup();
   keypadShield.setup(&victron);
   remotes.setup(&keypadShield);
   keypadShield.writeTmpMessage("setup done", 1000);

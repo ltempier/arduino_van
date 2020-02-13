@@ -63,38 +63,29 @@ void KeypadShield::writeTmpMessage(String msg, int tmpDisplayDuration = 3000) {
 
 void KeypadShield::displayPvWatt(boolean force = false) {
   String topLine = "Ppv: ";
-  String sPvWatt = String(this->victron->getPvWatt(), 2);
-  sPvWatt += " W";
-
+  String sPvWatt = String(this->victron->getPvWatt(), 2) + " W";
   byte appendSpaces =  16 - (topLine.length() + sPvWatt.length());
   for (byte i = 0 ; i < appendSpaces; i++)
     topLine += " ";
-
   this->writeTopLine(topLine + sPvWatt, force);
 }
 
 void KeypadShield::displayPvVolt( boolean force = false) {
   String topLine = "Vpv: ";
-  String sPvVolt = String(this->victron->getPvVolt(), 2);
-  sPvVolt += " V";
-
+  String sPvVolt = String(this->victron->getPvVolt(), 2) + " V";
   byte appendSpaces =  16 - (topLine.length() + sPvVolt.length());
   for (byte i = 0 ; i < appendSpaces; i++)
     topLine += " ";
   this->writeTopLine(topLine + sPvVolt, force);
-
 }
 
 void KeypadShield::displayBVolt( boolean force = false) {
   String topLine = "Vb: ";
-  String sBVolt = String(this->victron->getBVolt(), 2);
-  sBVolt += " V";
-
+  String sBVolt = String(this->victron->getBVolt(), 2) + " V";
   byte appendSpaces =  16 - (topLine.length() + sBVolt.length());
   for (byte i = 0 ; i < appendSpaces; i++)
     topLine += " ";
   this->writeTopLine(topLine + sBVolt, force);
-
 }
 
 void KeypadShield::displayErrCode( boolean force = false) {
@@ -147,7 +138,6 @@ void KeypadShield::displayChargeState() {
 
 
 void KeypadShield::setup(Victron *victron) {
-
   this->victron = victron;
 
   pinMode(pin_LCD_BL, OUTPUT);
@@ -191,25 +181,19 @@ void KeypadShield::loop() {
   switch (this->currentView) {
     case PPV:
       this->displayPvWatt(button != NONE);
-      this->displayChargeState();
-
       break;
     case VPV:
       this->displayPvVolt(button != NONE);
-      this->displayChargeState();
-
       break;
     case VB:
       this->displayBVolt( button != NONE);
-      this->displayChargeState();
-
       break;
     case ERR:
       this->displayErrCode( button != NONE);
-      this->displayChargeState();
       break;
   }
 
+  this->displayChargeState();
 
   if (millis() - this->lastTimeTurnDisplayOn >  60000) // turnDisplayOff after 60 sec
     this->turnDisplayOff();

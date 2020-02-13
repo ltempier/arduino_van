@@ -2,6 +2,7 @@
 #define VICTRON_h
 
 #include <Arduino.h>
+#include <SoftwareSerial.h>
 
 /*
     ERR CODE:
@@ -23,6 +24,7 @@
 
 class Victron {
   private:
+
     float pvWatt = 0;
     float pvVolt = 0;
     float bVolt = 0;
@@ -30,8 +32,15 @@ class Victron {
     int chargeState = 0;
     int errCode = 0;
 
-    const int comDelayMicros = 800;
+    const int comDelayMicros = 100;
     void fetch();
+
+    SoftwareSerial victronSerial = SoftwareSerial(3, 4); // RX, TX not used
+
+    void setPvWatt(float value);
+    void setBVolt(float value);
+    void setPvVolt(float value);
+    void setChargeState(int value);
 
   public:
     void setup();
