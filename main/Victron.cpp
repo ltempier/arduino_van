@@ -135,6 +135,13 @@ int Victron::getBatteryStateOfCharge() {
     {12.6, 100}
   };
 
+  for(int i=10; i>=0; i--){
+     if (this->bVolt < voltages[i][0]) {
+      if (i == 10)
+        return 100;
+     }
+  }
+
   for (int i = 0; i < 11; i++) {
     if (this->bVolt < voltages[i][0]) {
       if (i == 0)
