@@ -37,11 +37,6 @@ class Victron {
 
     SoftwareSerial victronSerial = SoftwareSerial(3, 4); // RX, TX not used
 
-    void setPvWatt(float value);
-    void setBVolt(float value);
-    void setPvVolt(float value);
-    void setChargeState(int value);
-
   public:
     void setup();
     void loop();
@@ -49,8 +44,9 @@ class Victron {
     float getPvWatt();
     float getBVolt();
     float getPvVolt();
-
     int getChargeStatePercent();
+    int getBatteryStateOfCharge();
+
     int getErrCode();
 };
 

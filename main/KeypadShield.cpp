@@ -13,7 +13,7 @@ void KeypadShield::turnDisplayOff() {
 }
 
 int KeypadShield::getButton() {
-  static const int values[] = { 50, 150, 300, 500, 750 };
+  const int values[] = { 50, 150, 300, 500, 750 };
   int value = analogRead(pin_button);
   if (value > values[4] || millis() - this->lastTimeBtnClick < 300)
     return NONE;
@@ -98,7 +98,7 @@ void KeypadShield::displayErrCode( boolean force = false) {
 }
 
 void KeypadShield::displayChargeState() {
-  const int percent = this->victron->getChargeStatePercent();
+  const int percent = this->victron->getBatteryStateOfCharge();
   if (this->displayedChargeStatePercent == percent)
     return;
 

@@ -1,6 +1,9 @@
 
 #include "Victron.h"
 
+//<Newline><Field-Label><Tab><Field-Value>
+// \r\nVPV\t1337
+
 void Victron::fetch() {
 
   //Serial.println("Victron::fetch()");
@@ -19,8 +22,8 @@ void Victron::fetch() {
     Serial.println("msg:");
     Serial.println(message);
   */
-  
-  String bufferName = "";
+
+  String fieldLabel = "";
   boolean readValue = false;
   float bufferValue = 0;
   int comma = -1;
@@ -29,9 +32,11 @@ void Victron::fetch() {
 
   for (int i = 0; i <  message.length(); i++) {
     char c = message.charAt(i);
+
     if (c == '\r') {
+
     }
-    else if (c == '\n' && bufferName.length() > 0 && readValue) { //
+    else if (c == '\n' && fieldLabel.length() > 0 && readValue) { //
       if (comma > 0)
         bufferValue = bufferValue / pow(10, comma);
       if (isNegativeValue)
@@ -43,16 +48,16 @@ void Victron::fetch() {
       */
 
       if (hasError == false) {
-        if (bufferName == "V")
+        if (fieldLabel == "V")
           this->bVolt = bufferValue / 1000.0;
-        if (bufferName == "VPV")
+        if (fieldLabel == "VPV")
           this->pvVolt = bufferValue / 1000.0;
-        if (bufferName == "PPV")
+        if (fieldLabel == "PPV")
           this->pvWatt = bufferValue;
-        if (bufferName == "CS")
+        if (fieldLabel == "CS")
           this->chargeState = (int) bufferValue;
-        if (bufferName == "ERR")
-          this->errCode =  (int) bufferValue;
+        if (fieldLabel == "ERR")
+          this->errCode = (int) bufferValue;
       } else {
         /*
           Serial.println("has error");
@@ -62,7 +67,7 @@ void Victron::fetch() {
       }
 
       hasError = false;
-      bufferName = "";
+      fieldLabel = "";
       readValue = false;
       isNegativeValue = false;
     }
@@ -73,12 +78,11 @@ void Victron::fetch() {
       isNegativeValue = false;
     }
     else if (readValue) {
-
       // muneric value
-      if (bufferName == "V" || bufferName == "VPV" || bufferName == "PPV" || bufferName == "CS" || bufferName == "ERR") {
+      if (fieldLabel == "V" || fieldLabel == "VPV" || fieldLabel == "PPV" || fieldLabel == "CS" || fieldLabel == "ERR") {
         if (c == '-') {
           isNegativeValue = true;
-        } else if ((c == '.' || c == ',') && comma <= 0) {
+        } else if ((c == '.' || c == ',') && comma < 0) {
           comma = 0;
         }
         else if (c >= '0' && c <= '9') {
@@ -89,60 +93,59 @@ void Victron::fetch() {
           hasError = true;
       }
 
-
+      //text value
+      //TODO
     }
     else  if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')) {
-      bufferName += c;
+      fieldLabel += c;
     }
   }
 }
 
 
-void Victron::setPvWatt(float value) {
-  if (this->pvWatt = -1337)
-    this->pvWatt = value;
-  else if (value > this->pvWatt * 0.5 && value < this->pvWatt * 1.5)
-    this->pvWatt = value;
-}
-
 float Victron::getPvWatt() {
   return this->pvWatt;
-}
-
-
-void Victron::setBVolt(float value) {
-  if (this->bVolt = -1337)
-    this->bVolt = value;
-  else if (value > this->bVolt * 0.5 && value < this->bVolt * 1.5)
-    this->bVolt = value;
 }
 
 float Victron::getBVolt() {
   return this->bVolt;
 }
 
-
-void Victron::setPvVolt(float value) {
-  if (this->pvVolt = -1337)
-    this->pvVolt = value;
-  else if (value > this->pvVolt * 0.5 && value < this->pvVolt * 1.5)
-    this->pvVolt = value;
-}
-
 float Victron::getPvVolt() {
   return this->pvVolt;
 }
 
-void Victron::setChargeState(int value) {
-  if (this->chargeState = -1337)
-    this->chargeState = value;
-  else if (value > this->chargeState - 2 && value < this->chargeState + 2)
-    this->chargeState = value;
+int Victron::getChargeStatePercent() {
+  this->chargeState;
 }
 
-int Victron::getChargeStatePercent() {
-  return map(this->chargeState, 0, 9, 0, 100);
+int Victron::getBatteryStateOfCharge() {
+  // Battery Voltage -> SOC %
+  const float voltages[11][2] = {
+    {10.5, 0},
+    {11.31, 10},
+    {11.58, 20},
+    {11.75, 30},
+    {11.9, 40},
+    {12.06, 50},
+    {12.2, 60},
+    {12.32, 70},
+    {12.42, 80},
+    {12.5, 90},
+    {12.6, 100}
+  };
+
+  for (int i = 0; i < 11; i++) {
+    if (this->bVolt < voltages[i][0]) {
+      if (i == 0)
+        return 0;
+      return (int) map(bVolt, voltages[i - 1][0], voltages[i][0], voltages[i - 1][1], voltages[i][1]);
+      //return (int) (this->bVolt - voltages[i - 1][0]) * (voltages[i][1] - voltages[i - 1][1]) / (voltages[i][0] - voltages[i - 1][0]) + voltages[i - 1][1];
+    }
+  }
+  return 100;
 }
+
 int Victron::getErrCode() {
   return this->errCode;
 }

@@ -21,13 +21,22 @@ unsigned long Remotes::getButton() {
     unsigned long id = mySwitch.getReceivedValue();
     mySwitch.resetAvailable();
 
-    if (id == this->lastBtnClick && millis() - this->lastTimeBtnClick < 200)
+    if (id == this->lastBtnClick && millis() - this->lastTimeBtnClick < 500)
       return 0;
 
     this->lastTimeBtnClick = millis();
     this->lastBtnClick = id;
-
     return id;
+  }
+  return 0;
+}
+
+unsigned long Remotes::getButton(unsigned int attempts) {
+  for (int i = 0 ; i < attempts; i++) {
+    unsigned long id = this->getButton();
+    if (id > 0)
+      return id;
+    delay(50);
   }
   return 0;
 }
@@ -113,7 +122,6 @@ void Remotes::setup(KeypadShield *keypadShield) {
   //this->pwm.setOscillatorFrequency(27000000);
   this->pwm.setPWMFreq(1000);
 
-
   this->setAllLights(0);
   /*
     this->setLight1(this->getLightLevel(0));
@@ -123,7 +131,7 @@ void Remotes::setup(KeypadShield *keypadShield) {
 }
 
 void Remotes::loop() {
-  unsigned long id = this->getButton();
+  unsigned long id = this->getButton(3);
   if (id > 0) {
 
     //Serial.print("click remote: ");
@@ -187,14 +195,12 @@ void Remotes::loop() {
         this->setLight1(0);
       else
         this->setLight1(this->lightLevels);
-      delay(500);
     }
     else if (this->arrayContain(LIGHT_SWITCH_RIGHT, id) == true) {
       if (this->levelLight2 > 0)
         this->setLight2(0);
       else
         this->setLight2(this->lightLevels);
-      delay(500);
     }
     else
       this->keypadShield->writeTmpMessage("BTN NOT ASSIGNED", 1000);

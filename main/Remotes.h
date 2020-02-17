@@ -31,6 +31,8 @@ class Remotes {
     unsigned long lastBtnClick;
 
     unsigned long getButton();
+    unsigned long getButton(unsigned int attempts);
+
 
     byte getSavedLightLevel(int light);
     void saveLightLevel(int light, byte value);
