@@ -135,22 +135,14 @@ int Victron::getBatteryStateOfCharge() {
     {12.6, 100}
   };
 
-  for(int i=10; i>=0; i--){
-     if (this->bVolt < voltages[i][0]) {
+  for (int i = 10; i >= 0; i--) {
+    if (this->bVolt > voltages[i][0]) {
       if (i == 10)
         return 100;
-     }
-  }
-
-  for (int i = 0; i < 11; i++) {
-    if (this->bVolt < voltages[i][0]) {
-      if (i == 0)
-        return 0;
-      return (int) map(bVolt, voltages[i - 1][0], voltages[i][0], voltages[i - 1][1], voltages[i][1]);
-      //return (int) (this->bVolt - voltages[i - 1][0]) * (voltages[i][1] - voltages[i - 1][1]) / (voltages[i][0] - voltages[i - 1][0]) + voltages[i - 1][1];
+      return (int) map(bVolt, voltages[i][0], voltages[i + 1][0], voltages[i][1], voltages[i + 1][1]);
     }
   }
-  return 100;
+  return 0;
 }
 
 int Victron::getErrCode() {
