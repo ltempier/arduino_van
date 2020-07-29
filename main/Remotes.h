@@ -19,13 +19,22 @@ class Remotes {
 
     KeypadShield *keypadShield;
 
-    boolean arrayContain(unsigned long testArray[], unsigned long value);
+    const int levelValues[8] =  {0, 20, 128, 256, 512, 1024, 2048, 4096};
+    const int lightLevels = sizeof(this->levelValues) / sizeof(int) - 1;
 
-    const byte lightLevels = 3;
+    const int levelOn = 5;
+   // const int levelOff = 0;
+
+    
+    const int pinLight1 = 0;
+    const int pinLight2 = 1;
+    const int pinLight3 = 2;
 
     int levelLight1;
     int levelLight2;
     int levelLight3;
+
+    boolean arrayContain(unsigned long testArray[], unsigned long value);
 
     unsigned long lastTimeBtnClick = 0;
     unsigned long lastBtnClick;
@@ -37,11 +46,12 @@ class Remotes {
     byte getSavedLightLevel(int light);
     void saveLightLevel(int light, byte value);
 
+    void setLight(int lightId, int value, boolean showMessage);
 
-    void setLight1(int value, boolean showMessage);
-    void setLight2(int value, boolean showMessage);
-    void setLight3(int value, boolean showMessage);
     void setAllLights(int value, boolean showMessage);
+    void increaseAllLights(boolean showMessage);
+    void decreaseAllLights(boolean showMessage);
+
 
   public:
     void setup(KeypadShield *keypadShield);

@@ -41,70 +41,75 @@ unsigned long Remotes::getButton(unsigned int attempts) {
   return 0;
 }
 
-void Remotes::setLight1(int value, boolean showMessage = true) {
-  if (value < 0)
-    value = 0;
-  else if (value > this->lightLevels)
-    value = this->lightLevels;
+void Remotes::setLight(int lightId, int level, boolean showMessage = true) {
 
-  if (this->levelLight1 == value)
+  if (level < 0)
+    level = 0;
+  else if (level > this->lightLevels)
+    level = this->lightLevels;
+
+  int *currentLevel;
+  int pin;
+  switch (lightId) {
+    case 1:
+      currentLevel = &this->levelLight1;
+      pin = this->pinLight1;
+      break;
+    case 2:
+      currentLevel = &this->levelLight2;
+      pin = this->pinLight2;
+      break;
+    case 3:
+      currentLevel = &this->levelLight3;
+      pin = this->pinLight3;
+      break;
+    default:
+      this->keypadShield->writeTmpMessage("unknow light id: " + String(lightId), 1000);
+      return;
+      break;
+  }
+
+  if (*currentLevel == level)
     return;
 
-  int pwmValue = map(value, 0, this->lightLevels, 0, 4096);
-  this->pwm.setPin(0, pwmValue);
+  //int pwmValue = map(value, 0, this->lightLevels, 0, 4096);
+  int pwmValue = this->levelValues[level];
 
-  this->levelLight1 = value;
-  //this->saveLightLevel(0, value);
+  //Serial.print("pwmValue: ");
+  //Serial.println(pwmValue);
+
+  this->pwm.setPin(pin, pwmValue);
+  *currentLevel = level;
 
   if (showMessage)
-    this->keypadShield->writeTmpMessage("LIGHT 1    (" + String(value) + "/" + String(this->lightLevels) + ")", 1000);
+    this->keypadShield->writeTmpMessage("LIGHT " + String(lightId ) + "    (" + String(level) + "/" + String(this->lightLevels) + ")", 1000);
 }
 
-void Remotes::setLight2(int value, boolean showMessage = true) {
-  if (value < 0)
-    value = 0;
-  else  if (value > this->lightLevels)
-    value = this->lightLevels;
+void Remotes::setAllLights(int level, boolean showMessage = true) {
 
-  if (this->levelLight2 == value)
-    return;
-
-  int pwmValue = map(value, 0, this->lightLevels, 0, 4096);
-  this->pwm.setPin(1, pwmValue);
-
-  this->levelLight2 = value;
-  //this->saveLightLevel(1, value);
+  this->setLight(1, level, false);
+  this->setLight(2, level, false);
+  this->setLight(3, level, false);
 
   if (showMessage)
-    this->keypadShield->writeTmpMessage("LIGHT 2    (" + String(this->levelLight2) + "/" + String(this->lightLevels) + ")", 1000);
+    this->keypadShield->writeTmpMessage("ALL LIGHTS (" + String(level) + "/" + String(this->lightLevels) + ")", 1000);
 }
 
-void Remotes::setLight3(int value, boolean showMessage = true) {
-  if (value < 0)
-    value = 0;
-  else if (value > this->lightLevels)
-    value = this->lightLevels;
-  if (this->levelLight3 == value)
-    return;
 
-  int pwmValue = map(value, 0, this->lightLevels, 0, 4096);
-  this->pwm.setPin(2, pwmValue);
-
-  this->levelLight3 = value;
-  //this->saveLightLevel(2, value);
-
+void Remotes::increaseAllLights( boolean showMessage = true) {
+  this->setLight(1, this->levelLight1 + 1, false);
+  this->setLight(2, this->levelLight2 + 1, false);
+  this->setLight(3, this->levelLight3 + 1, false);
   if (showMessage)
-    this->keypadShield->writeTmpMessage("LIGHT 3    (" + String(this->levelLight3) + "/" + String(this->lightLevels) + ")", 1000);
+    this->keypadShield->writeTmpMessage("INCREASE ALL LIGHTS", 1000);
 }
 
-void Remotes::setAllLights(int value, boolean showMessage = true) {
-
-  this->setLight1(value, false);
-  this->setLight2(value, false);
-  this->setLight3(value, false);
-
+void Remotes::decreaseAllLights( boolean showMessage = true) {
+  this->setLight(1, this->levelLight1 - 1, false);
+  this->setLight(2, this->levelLight2 - 1, false);
+  this->setLight(3, this->levelLight3 - 1, false);
   if (showMessage)
-    this->keypadShield->writeTmpMessage("ALL LIGHTS (" + String(value) + "/" + String(this->lightLevels) + ")", 1000);
+    this->keypadShield->writeTmpMessage("DECREASE ALL LIGHTS", 1000);
 }
 
 void Remotes::setup(KeypadShield *keypadShield) {
@@ -138,71 +143,88 @@ void Remotes::loop() {
     //Serial.println(id);
 
     if (this->arrayContain(ALL_ON, id) == true)
-      this->setAllLights(this->lightLevels);
+      this->setAllLights(this->levelOn);
 
     else if (this->arrayContain(ALL_OFF, id) == true)
       this->setAllLights(0);
 
     else if (this->arrayContain(A_1_ON, id) == true) {
       if (this->levelLight1 > 0)
-        this->setLight1(this->levelLight1 + 1);
+        this->setLight(1, this->levelLight1 + 1);
       else
-        this->setLight1(this->lightLevels);
+        this->setLight(1, this->levelOn);
     }
 
     else if (this->arrayContain(A_1_OFF, id) == true)
-      this->setLight1(0);
+      this->setLight(1, 0);
 
     else if (this->arrayContain(A_2_ON, id) == true ) {
       if (this->levelLight2 > 0)
-        this->setLight2(this->levelLight2 + 1);
+        this->setLight(2, this->levelLight2 + 1);
       else
-        this->setLight2(this->lightLevels);
+        this->setLight(2, this->levelOn);
     }
 
     else if (this->arrayContain(A_2_OFF, id) == true)
-      this->setLight2(0);
+      this->setLight(2, 0);
 
     else if (this->arrayContain(A_3_ON, id) == true) {
       if (this->levelLight3 > 0)
-        this->setLight3(this->levelLight3 + 1);
+        this->setLight(3, this->levelLight3 + 1);
       else
-        this->setLight3(this->lightLevels);
+        this->setLight(3, this->levelOn);
     }
 
     else if (this->arrayContain(A_3_OFF, id) == true)
-      this->setLight3(0);
+      this->setLight(3, 0);
+
+    else if (this->arrayContain(A_4_ON, id) == true)
+      this->decreaseAllLights();
+
+    else if (this->arrayContain(A_4_OFF, id) == true)
+      this->increaseAllLights();
 
     else if (this->arrayContain(B_1_ON, id) == true)
-      this->setLight1(this->levelLight1 - 1);
+      this->setLight(1, this->levelLight1 - 1);
 
     else if (this->arrayContain(B_1_OFF, id) == true)
-      this->setLight1(this->levelLight1 + 1);
+      this->setLight(1, this->levelLight1 + 1);
 
     else if (this->arrayContain(B_2_ON, id) == true)
-      this->setLight2(this->levelLight2 - 1);
+      this->setLight(2, this->levelLight2 - 1);
     else if (this->arrayContain(B_2_OFF, id) == true)
-      this->setLight2(this->levelLight2 + 1);
+      this->setLight(2, this->levelLight2 + 1);
 
     else if (this->arrayContain(B_3_ON, id) == true)
-      this->setLight3(this->levelLight3 - 1);
+      this->setLight(3, this->levelLight3 - 1);
 
     else if (this->arrayContain(B_3_OFF, id) == true)
-      this->setLight3(this->levelLight3 + 1);
+      this->setLight(3, this->levelLight3 + 1);
+
+    else if (this->arrayContain(B_4_ON, id) == true)
+      this->decreaseAllLights();
+
+    else if (this->arrayContain(B_4_OFF, id) == true)
+      this->increaseAllLights();
 
     else if (this->arrayContain(LIGHT_SWITCH_LEFT, id) == true) {
       if (this->levelLight1 > 0)
-        this->setLight1(0);
+        this->setLight(1, 0);
       else
-        this->setLight1(this->lightLevels);
+        this->setLight(1, this->levelOn);
     }
     else if (this->arrayContain(LIGHT_SWITCH_RIGHT, id) == true) {
-      if (this->levelLight2 > 0)
-        this->setLight2(0);
-      else
-        this->setLight2(this->lightLevels);
+      if (this->levelLight2 > 0 || this->levelLight3 > 0) {
+        this->setLight(2, 0);
+        this->setLight(3, 0);
+      }
+      else {
+        this->setLight(2, this->levelOn);
+        this->setLight(3, this->levelOn);
+      }
     }
     else
       this->keypadShield->writeTmpMessage("BTN NOT ASSIGNED", 1000);
   }
+
 }

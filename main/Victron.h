@@ -28,15 +28,21 @@ class Victron {
     float pvWatt = 0;
     float pvVolt = 0;
     float bVolt = 0;
+    float bAmp = 0;
+    
+    float yeldToday = 0; //kWh
+    float yeldYesterday= 0; //kWh
 
     int chargeState = 0;
     int errCode = 0;
 
-    const int comDelayMicros = 100;
-    void fetch();
+    //const int comDelayMicros = 100;
+    boolean fetch();
 
     SoftwareSerial victronSerial = SoftwareSerial(3, 4); // RX, TX not used
 
+    int computeStateOfChargeFromVoltage();
+    
   public:
     void setup();
     void loop();
@@ -44,10 +50,13 @@ class Victron {
     float getPvWatt();
     float getBVolt();
     float getPvVolt();
-    int getChargeStatePercent();
-    int getBatteryStateOfCharge();
 
+    int getChargeStateCode();
+    String getChargeStateLabel();
     int getErrCode();
+    String getErrLabel();
+
+    int getBatteryStateOfCharge();
 };
 
 

@@ -4,7 +4,7 @@
 //<Newline><Field-Label><Tab><Field-Value>
 // \r\nVPV\t1337
 
-void Victron::fetch() {
+boolean Victron::fetch() {
 
   //Serial.println("Victron::fetch()");
   String message = "";
@@ -15,20 +15,21 @@ void Victron::fetch() {
       break;
   }
 
-  if (message.length() == 0)
-    return;
+  if (message.length() == 0) {
+    return true;
+  }
 
   /*
     Serial.println("msg:");
     Serial.println(message);
   */
 
+  boolean hasError = false;
   String fieldLabel = "";
   boolean readValue = false;
   float bufferValue = 0;
   int comma = -1;
   boolean isNegativeValue = false;
-  boolean hasError = false;
 
   for (int i = 0; i <  message.length(); i++) {
     char c = message.charAt(i);
@@ -50,13 +51,19 @@ void Victron::fetch() {
       if (hasError == false) {
         if (fieldLabel == "V")
           this->bVolt = bufferValue / 1000.0;
-        if (fieldLabel == "VPV")
+        else if (fieldLabel == "I")
+          this->bAmp = bufferValue / 1000.0;
+        else if (fieldLabel == "VPV")
           this->pvVolt = bufferValue / 1000.0;
-        if (fieldLabel == "PPV")
+        else if (fieldLabel == "PPV")
           this->pvWatt = bufferValue;
-        if (fieldLabel == "CS")
+        else if (fieldLabel == "H20")
+          this->yeldToday = bufferValue;
+        else if (fieldLabel == "H22")
+          this->yeldYesterday = bufferValue;
+        else if (fieldLabel == "CS")
           this->chargeState = (int) bufferValue;
-        if (fieldLabel == "ERR")
+        else if (fieldLabel == "ERR")
           this->errCode = (int) bufferValue;
       } else {
         /*
@@ -100,6 +107,7 @@ void Victron::fetch() {
       fieldLabel += c;
     }
   }
+  return hasError;
 }
 
 
@@ -115,12 +123,17 @@ float Victron::getPvVolt() {
   return this->pvVolt;
 }
 
-int Victron::getChargeStatePercent() {
-  this->chargeState;
+int Victron::getChargeStateCode() {
+  return this->chargeState;
 }
 
-int Victron::getBatteryStateOfCharge() {
-  // Battery Voltage -> SOC %
+String Victron::getChargeStateLabel() {
+  const String labels[6] = {"Off", "Low power", "Fault", "Bulk", "Absorption", "Float"}; // 0,1,2,3,4,5, (9=Inverting)
+  if (this->chargeState < 6)
+    return labels[this->chargeState];
+}
+
+int Victron::computeStateOfChargeFromVoltage() {
   const float voltages[11][2] = {
     {10.5, 0},
     {11.31, 10},
@@ -145,8 +158,56 @@ int Victron::getBatteryStateOfCharge() {
   return 0;
 }
 
+
+int Victron::getBatteryStateOfCharge() {
+  int result = this->computeStateOfChargeFromVoltage();
+  switch (this->getChargeStateCode()) {
+    case 0: // Off
+    default:
+      break;
+
+    case 3: //Bulk (batterie partiellement chargée)
+      break;
+
+    case 4: //Absorption (batterie chargée à 80 % ou plus)
+      if (result < 80)
+        result = 80;
+      break;
+
+    case 5: //Float
+      result = 100;
+      break;
+  }
+  return result;
+}
+
 int Victron::getErrCode() {
   return this->errCode;
+}
+
+String Victron::getErrLabel() {
+  const int errCodes[14] = {0, 2, 17, 18, 19, 20, 21, 26, 33, 34, 38, 116, 117, 119};
+  const String errLabels[14] = {
+    "No error",
+    "Battery voltage too high",
+    "Charger temperature too high",
+    "Charger over current",
+    "Charger current reversed",
+    "Bulk time limit exceeded",
+    "Current sensor issue",
+    "Terminals overheated",
+    "Input voltage too high",
+    "Input current too high",
+    "Input shutdown",
+    "Factory calibration data lost",
+    "Invalid/incompatible firmware",
+    "User settings invalid"
+  };
+
+  for (int i = 0; i < 14; i++) {
+    if (    errCodes[i] == this->errCode)
+      return errLabels[i];
+  }
 }
 
 void Victron::setup() {
@@ -155,5 +216,10 @@ void Victron::setup() {
 }
 
 void Victron::loop() {
-  this->fetch();
+  boolean error;
+  int i = 0;
+  do {
+    error = this->fetch();
+    i++;
+  } while (error && i <= 10);
 }

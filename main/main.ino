@@ -15,8 +15,18 @@ void setup() {
   keypadShield.writeTmpMessage("setup done", 1000);
 }
 
+unsigned long bufferTime = 100000;
+
 void loop() {
-  victron.loop();
   keypadShield.loop();
   remotes.loop();
+  victron.loop();
+
+  /*
+  unsigned long now = millis();
+  if(now - bufferTime > 5000 || now < bufferTime){ // every 5sec
+    bufferTime = now;
+    victron.loop();
+  }
+  */
 }
